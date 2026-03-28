@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Jobs\SendForgotPasswordOTPEmail;
 use App\Jobs\SendVerificationEmail;
 use App\Repositories\Contracts\AuthenticationRepositoryInterface;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class AuthenticationService
 {
@@ -54,9 +56,13 @@ class AuthenticationService
                 throw new \Exception('Invalid credentials. Email or password is incorrect');
             }
 
-            // if (!password_verify($data['password'], $isUserExist->password)) {
-            //     throw new \Exception('Invalid credentials. Email or password is incorrect');
-            // }
+            if (!Hash::check($data['password'], $isUserExist->password)) {
+                throw new \Exception('Invalid credentials. Email or password is incorrect');
+            }
+
+            if (!$isUserExist->email_verified_at) {
+                throw new \Exception('Please verify your email before logging in');
+            }
 
             $token = $isUserExist->createToken('auth_token')->accessToken;
             return [
@@ -83,6 +89,58 @@ class AuthenticationService
             }
 
             $this->authRepo->markedEmailAsVerified($user->id);
+            DB::commit();
+            return true;
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public function forgotPassword(array $data)
+    {
+        DB::beginTransaction();
+        try {
+            $isUserExist = $this->findByEmail($data['email']);
+            if (!$isUserExist) {
+                throw new \Exception('User not found');
+            }
+
+            if (!empty($isUserExist)){
+                $otpCode = $this->otpService->generateOtp([
+                    'user_id' => $isUserExist->id,
+                    'type' => 1
+                ]);
+                SendForgotPasswordOTPEmail::dispatch($otpCode, $isUserExist->email, $isUserExist->name);
+            }
+
+            DB::commit();
+            return true;
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public function resetPassword(array $data)
+    {
+        DB::beginTransaction();
+        try {
+            $user = $this->findByEmail($data['email']);
+            if (!$user) {
+                throw new \Exception('User not found');
+            }
+
+            $isValidOtp = $this->otpService->validateOtp($user->id, $data['otp_code'], 1);
+            if (!$isValidOtp) {
+                throw new \Exception('Invalid or Expired OTP code');
+            }
+
+            $updatePassword = $this->authRepo->updatePassword($user->id, Hash::make($data['new_password']));
+            if (!$updatePassword) {
+                throw new \Exception('Failed to update password. Please try again');
+            }
+
             DB::commit();
             return true;
         } catch (\Throwable $e) {

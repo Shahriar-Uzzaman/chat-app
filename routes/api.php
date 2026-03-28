@@ -15,6 +15,8 @@ Route::prefix('v1')->group(function () {
         Route::post('/login', [AuthenticationController::class, 'login']);
         Route::post('/register', [AuthenticationController::class, 'register']);
         Route::post('/verify-email', [AuthenticationController::class, 'verifyEmail']);
+        Route::post('/forgot-password', [AuthenticationController::class, 'forgotPassword']);
+        Route::post('/reset-password', [AuthenticationController::class, 'resetPassword']);
     });
 
     Route::prefix('users')->group(function () {

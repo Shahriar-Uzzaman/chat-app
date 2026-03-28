@@ -10,7 +10,7 @@ class AuthenticationRepository implements AuthenticationRepositoryInterface
 {
     public function findByEmail(string $email)
     {
-        return DB::table('users')->where('email', $email)->first();
+        return User::where('email', $email)->first();
     }
 
     public function store(array $data)
@@ -21,5 +21,10 @@ class AuthenticationRepository implements AuthenticationRepositoryInterface
     public function markedEmailAsVerified(int $userId)
     {
         return DB::table('users')->where('id', $userId)->update(['email_verified_at' => now()]);
+    }
+
+    public function updatePassword(int $userId, string $newPassword)
+    {
+        return DB::table('users')->where('id', $userId)->update(['password' => $newPassword]);
     }
 }
