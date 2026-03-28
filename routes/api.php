@@ -19,13 +19,12 @@ Route::prefix('v1')->group(function () {
     Route::group(['middleware' => ['auth:api']], function () {
         Route::post('/logout', [AuthenticationController::class, 'logout']);
         Route::post('/change-password', [UserController::class, 'changePassword']);
-    });
 
-    Route::prefix('users')->group(function () {
-        Route::get('/', [UserController::class, 'getAllUsers']);
-        Route::get('/{id}', [UserController::class, 'getUserById']);
-        Route::post('/', [UserController::class, 'createUser']);
-        Route::put('/{id}', [UserController::class, 'updateUser']);
-        Route::delete('/{id}', [UserController::class, 'deleteUser']);
+        Route::prefix('users')->group(function () {
+            Route::get('/', [UserController::class, 'getAllUsers']);
+            Route::get('/{id}', [UserController::class, 'getUserById']);
+            Route::patch('/{id}', [UserController::class, 'updateUser']);
+            Route::delete('/{id}', [UserController::class, 'deleteUser']);
+        });
     });
 });
