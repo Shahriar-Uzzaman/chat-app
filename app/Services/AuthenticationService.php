@@ -148,4 +148,14 @@ class AuthenticationService
             throw $e;
         }
     }
+
+    public function logout($request)
+    {
+        try {
+            $request->user()->token()->revoke();
+            return true;
+        } catch (\Throwable $e) {
+            throw $e;
+        }
+    }
 }

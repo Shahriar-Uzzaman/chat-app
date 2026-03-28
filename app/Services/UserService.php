@@ -4,7 +4,9 @@ namespace App\Services;
 
 use App\Jobs\SendVerificationEmail;
 use App\Repositories\Contracts\UserRepositoryInterface;
+use Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class UserService
 {
@@ -56,29 +58,6 @@ class UserService
         }
     }
 
-    public function createUser(array $data)
-    {
-        DB::beginTransaction();
-        try {
-            $isEmailExists = $this->userRepo->findUserByEmail($data['email']);
-            if ($isEmailExists) {
-                throw new \Exception("Email already exists.");
-            }
-
-            $data['password'] = bcrypt($data['password']);
-            $user = $this->userRepo->createUser($data);
-            if (!empty($user)) {
-                $generatedOTP = $this->generateOTP(6);
-                SendVerificationEmail::dispatch($generatedOTP, $data['email'], $data['name']);
-            }
-            DB::commit();
-            return $user;
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            throw $e;
-        }
-    }
-
     public function updateUser(int $id, array $data)
     {
         DB::beginTransaction();
@@ -122,12 +101,36 @@ class UserService
         }
     }
 
-    private function generateOTP(int $length = 6): int
+    public function changePassword(array $data)
     {
-        $otp = '';
-        for ($i = 0; $i < $length; $i++) {
-            $otp .= random_int(0, 9);
+        DB::beginTransaction();
+        try {
+            $userId = Auth::user()->id;
+            if (!$userId) {
+                throw new \Exception("Unauthorized action.");
+            }
+
+            $user = $this->userRepo->findUserById($userId);
+            if (!$user) {
+                throw new \Exception("User not found.");
+            }
+
+            if (!password_verify($data['current_password'], $user->password)) {
+                throw new \Exception("Current password is incorrect.");
+            }
+
+            $updatePassword = $this->userRepo->updateUser($userId, [
+                'password' => Hash::make($data['new_password'])
+            ]);
+            if (!$updatePassword) {
+                throw new \Exception("Failed to update password.");
+            }
+
+            DB::commit();
+            return true;
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            throw $e;
         }
-        return (int)$otp;
     }
 }

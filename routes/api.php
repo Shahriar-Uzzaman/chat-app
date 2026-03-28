@@ -5,10 +5,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UserController;
 
-//Route::get('/user', function (Request $request) {
-//    return $request->user();
-//})->middleware('auth:api');
-
 Route::prefix('v1')->group(function () {
     // Guest/Public routes
     Route::prefix('auth')->group(function () {
@@ -17,6 +13,12 @@ Route::prefix('v1')->group(function () {
         Route::post('/verify-email', [AuthenticationController::class, 'verifyEmail']);
         Route::post('/forgot-password', [AuthenticationController::class, 'forgotPassword']);
         Route::post('/reset-password', [AuthenticationController::class, 'resetPassword']);
+    });
+
+    # Authenticated routes
+    Route::group(['middleware' => ['auth:api']], function () {
+        Route::post('/logout', [AuthenticationController::class, 'logout']);
+        Route::post('/change-password', [UserController::class, 'changePassword']);
     });
 
     Route::prefix('users')->group(function () {

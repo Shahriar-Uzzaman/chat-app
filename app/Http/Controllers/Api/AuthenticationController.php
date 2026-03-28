@@ -40,4 +40,9 @@ class AuthenticationController extends Controller
     {
         return $this->success($this->authService->resetPassword($request->validated()), "Your password has been successfully reset");
     }
+
+    public function logout(Request $request)
+    {
+        return $this->success($this->authService->logout($request), "You have successfully logged out");
+    }
 }
