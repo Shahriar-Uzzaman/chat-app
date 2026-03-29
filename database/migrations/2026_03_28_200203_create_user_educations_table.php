@@ -11,15 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_academic_informations', function (Blueprint $table) {
+        Schema::create('user_educations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->string('high_school')->nullable();
-            $table->string('college_or_university')->nullable();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->string('school_name');
+            $table->enum('type', ['high_school', 'college', 'university']);
             $table->string('degree')->nullable();
             $table->string('field_of_study')->nullable();
-            $table->integer('start_year')->nullable();
-            $table->integer('graduation_year')->nullable();
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
+            $table->boolean('is_current')->default(false);
             $table->timestamps();
             $table->softDeletes();
         });
@@ -30,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_academic_informations');
+        Schema::dropIfExists('user_educations');
     }
 };
