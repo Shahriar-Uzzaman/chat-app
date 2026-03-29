@@ -42,4 +42,16 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    /**
+     * Configure the model factory.
+     */
+    public function configure(): static
+    {
+        return $this->afterCreating(function (\App\Models\User $user) {
+            \App\Models\UserProfile::factory()->create([
+                'user_id' => $user->id,
+            ]);
+        });
+    }
 }
