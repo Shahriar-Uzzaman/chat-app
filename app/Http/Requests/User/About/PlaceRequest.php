@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\User;
+namespace App\Http\Requests\User\About;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateRequest extends FormRequest
+class PlaceRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,8 +22,9 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'first_name' => ['nullable', 'string', 'max:255'],
-            'last_name' => ['nullable', 'string', 'max:255'],
+            'city_id' => ['required', 'exists:cities,id'],
+            'type' => ['required', 'string', 'in:current_city,hometown,past_city'],
+            'date_moved' => ['nullable', 'date'],
         ];
     }
 }
