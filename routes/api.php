@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\User\About\ProfileController;
+use App\Http\Controllers\Api\User\About\EducationController;
 
 Route::prefix('v1')->group(function () {
     // Guest/Public routes
@@ -31,6 +32,12 @@ Route::prefix('v1')->group(function () {
                 Route::get('/me', [ProfileController::class, 'findByUserId']);
                 Route::get('/{id}', [ProfileController::class, 'findById'])->whereNumber('id');
                 Route::post('/', [ProfileController::class, 'createOrUpdateProfile']);
+
+                Route::prefix("educations")->group(function () {
+                    Route::get('/me', [EducationController::class, 'findByUserId']);
+                    Route::get('/{id}', [EducationController::class, 'findById'])->whereNumber('id');
+                    Route::post('/', [EducationController::class, 'createOrUpdateEducation']);
+                });
             });
         });
     });
