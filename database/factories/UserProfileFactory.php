@@ -19,7 +19,6 @@ class UserProfileFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'middle_name' => fake()->optional()->lastName(),
             'phone_number' => fake()->unique()->e164PhoneNumber(),
             'date_of_birth' => fake()->date('Y-m-d', '-18 years'),
             'gender' => fake()->randomElement(['male', 'female', 'other']),

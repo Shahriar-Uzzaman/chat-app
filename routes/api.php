@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthenticationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\User\About\ProfileController;
 
 Route::prefix('v1')->group(function () {
     // Guest/Public routes
@@ -25,6 +26,12 @@ Route::prefix('v1')->group(function () {
             Route::get('/{id}', [UserController::class, 'getUserById']);
             Route::patch('/{id}', [UserController::class, 'updateUser']);
             Route::delete('/{id}', [UserController::class, 'deleteUser']);
+
+            Route::prefix('profiles')->group(function () {
+                Route::get('/me', [ProfileController::class, 'findByUserId']);
+                Route::get('/{id}', [ProfileController::class, 'findById'])->whereNumber('id');
+                Route::post('/', [ProfileController::class, 'createOrUpdateProfile']);
+            });
         });
     });
 });
