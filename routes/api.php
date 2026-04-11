@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\User\About\ProfileController;
 use App\Http\Controllers\Api\User\About\EducationController;
+use App\Http\Controllers\Api\Location\CountryController;
+use App\Http\Controllers\Api\Location\StateController;
 
 Route::prefix('v1')->group(function () {
     // Guest/Public routes
@@ -38,6 +40,25 @@ Route::prefix('v1')->group(function () {
                     Route::get('/{id}', [EducationController::class, 'findById'])->whereNumber('id');
                     Route::post('/', [EducationController::class, 'createOrUpdateEducation']);
                 });
+            });
+        });
+
+        Route::prefix("locations")->group(function () {
+            Route::prefix("/countries")->group(function () {
+                Route::get("/", [CountryController::class, 'getAll']);
+                Route::get("/{id}", [CountryController::class, "getById"])->whereNumber('id');
+                Route::post('/', [CountryController::class, 'store']);
+                Route::put('/{id}', [CountryController::class, 'update']);
+                Route::delete('/{id}', [CountryController::class, 'delete']);
+            });
+
+            Route::prefix("/states")->group(function () {
+                Route::get("/", [StateController::class, 'getAll']);
+                Route::get("/{id}", [StateController::class, "getById"])->whereNumber('id');
+                Route::get("/country/{id}", [StateController::class, "getByCountryId"])->whereNumber('id');
+                Route::post('/', [StateController::class, 'create']);
+                Route::put('/{id}', [StateController::class, 'update']);
+                Route::delete('/{id}', [StateController::class, 'delete']);
             });
         });
     });
